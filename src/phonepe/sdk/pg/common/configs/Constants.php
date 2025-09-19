@@ -23,13 +23,13 @@ class Constants
 {
 	# URLs and Endpoints
 	const BASE_URL_PROD = "https://api.phonepe.com/apis/pg";
-	const BASE_URL_UAT = "https://api-preprod.phonepe.com/apis/pg";
+	const BASE_URL_UAT = "https://api-preprod.phonepe.com/apis/pg-sandbox";
 	const BASE_URL_PROD_FOR_OAUTH = "https://api.phonepe.com/apis";
 	const BASE_URL_STAGE_FOR_OAUTH = "https://api-testing.phonepe.com/apis";
-	const BASE_URL_UAT_FOR_OAUTH = "https://api-preprod.phonepe.com/apis";
+	const BASE_URL_UAT_FOR_OAUTH = "https://api-preprod.phonepe.com/apis/pg-sandbox";
 	const BASE_URL_PROD_EVENTS = "https://api.phonepe.com/apis/pg-ingestion";
-	const BASE_URL_UAT_EVENTS = "https://api-preprod.phonepe.com/apis/pg-ingestion";
-	const OAUTH_ENDPOINT = "/identity-manager/v1/oauth/token";
+	const BASE_URL_UAT_EVENTS = "https://api-preprod.phonepe.com/apis/pg-sandbox";
+	const OAUTH_ENDPOINT = "/v1/oauth/token";
 	const ORDER_STATUS_ENDPOINT = "/checkout/v2/order";
 	const REFUND_ENDPOINT = "/payments/v2/refund";
 
