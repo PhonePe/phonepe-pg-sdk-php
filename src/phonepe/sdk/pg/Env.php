@@ -52,8 +52,6 @@ class Env
 				return Constants::BASE_URL_PROD_EVENTS;
 			case Env::UAT:
 				return Constants::BASE_URL_UAT_EVENTS;
-			case Env::STAGE:
-				return Constants::BASE_URL_STAGE_EVENTS;
 			default:
 				return "Invalid Environment";
 		}
@@ -72,4 +70,16 @@ class Env
 				return "Invalid Environment";
 		}
 	}
+
+    public static function getApiPathForOAuth($env): string
+    {
+        switch ($env) {
+            case Env::PRODUCTION:
+                return Constants::OAUTH_ENDPOINT_PROD;
+            case Env::UAT:
+                return Constants::OAUTH_ENDPOINT_UAT;
+            default:
+                return "Invalid Environment";
+        }
+    }
 }

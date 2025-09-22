@@ -99,7 +99,7 @@ class TokenService
 	 */
 	public function prepareOAuthToken(){
 		try {
-			$httpResponseObj = $this->httpClient::postRequest(Env::getBaseUrlForOAuth($this->env) . Constants::OAUTH_ENDPOINT, $this->preparePayload(), $this->prepareHeaders());
+			$httpResponseObj = $this->httpClient::postRequest(Env::getBaseUrlForOAuth($this->env) . Env::getApiPathForOAuth($this->env), $this->preparePayload(), $this->prepareHeaders());
 			$httpResponse = json_decode($httpResponseObj->getResponse());
 			$mapper = new JsonMapper();
 			$oAuthtoken = $mapper->map($httpResponse, new OAuthToken());
