@@ -29,7 +29,8 @@ class Constants
 	const BASE_URL_UAT_FOR_OAUTH = "https://api-preprod.phonepe.com/apis/pg-sandbox";
 	const BASE_URL_PROD_EVENTS = "https://api.phonepe.com/apis/pg-ingestion";
 	const BASE_URL_UAT_EVENTS = "https://api-preprod.phonepe.com/apis/pg-sandbox";
-	const OAUTH_ENDPOINT = "/v1/oauth/token";
+    const OAUTH_ENDPOINT_PROD = "/identity-manager/v1/oauth/token";
+    const OAUTH_ENDPOINT_UAT = "/v1/oauth/token";
 	const ORDER_STATUS_ENDPOINT = "/checkout/v2/order";
 	const REFUND_ENDPOINT = "/payments/v2/refund";
 
