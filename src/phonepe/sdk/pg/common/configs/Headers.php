@@ -25,7 +25,7 @@ class Headers
 	const APPLICATION_JSON = "application/json";
 
 	const SOURCE_PLATFORM_VERSION = "x-source-platform-version";
-	const SDK_VERSION = "2.0.0";
+	const SDK_VERSION = "2.0.1";
 
 	const SOURCE = "x-source";
 	const INTEGRATION = "API";
