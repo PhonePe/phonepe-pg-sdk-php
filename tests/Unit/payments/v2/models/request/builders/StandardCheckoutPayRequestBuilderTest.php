@@ -19,6 +19,7 @@
 namespace Tests\Unit\payments\v2\models\request\builders;
 
 use PhonePe\payments\v2\models\request\builders\StandardCheckoutPayRequestBuilder;
+use PhonePe\payments\v2\models\request\MetaInfo;
 use PhonePe\payments\v2\models\request\StandardCheckoutPayRequest;
 use PhonePe\payments\v2\standardCheckout\StandardCheckoutConstants;
 use Tests\Fixtures\TestDataProvider;
@@ -65,9 +66,9 @@ class StandardCheckoutPayRequestBuilderTest extends BaseTestCase
         $this->assertInstanceOf(StandardCheckoutPayRequest::class, $request);
         
         $metaInfo = $request->getMetaInfo();
-        $this->assertIsArray($metaInfo);
-        $this->assertEquals($testData['metaInfo']['udf1'], $metaInfo['udf1']);
-        $this->assertEquals($testData['metaInfo']['udf2'], $metaInfo['udf2']);
+        $this->assertInstanceOf(MetaInfo::class, $metaInfo);
+        $this->assertEquals($testData['metaInfo']['udf1'], $metaInfo->getUdf1());
+        $this->assertEquals($testData['metaInfo']['udf2'], $metaInfo->getUdf2());
     }
 
     public function testBuildPaymentRequestWithAllUdfFields(): void
@@ -87,11 +88,11 @@ class StandardCheckoutPayRequestBuilderTest extends BaseTestCase
             ->build();
 
         $metaInfo = $request->getMetaInfo();
-        $this->assertEquals('udf1_value', $metaInfo['udf1']);
-        $this->assertEquals('udf2_value', $metaInfo['udf2']);
-        $this->assertEquals('udf3_value', $metaInfo['udf3']);
-        $this->assertEquals('udf4_value', $metaInfo['udf4']);
-        $this->assertEquals('udf5_value', $metaInfo['udf5']);
+        $this->assertEquals('udf1_value', $metaInfo->getUdf1());
+        $this->assertEquals('udf2_value', $metaInfo->getUdf2());
+        $this->assertEquals('udf3_value', $metaInfo->getUdf3());
+        $this->assertEquals('udf4_value', $metaInfo->getUdf4());
+        $this->assertEquals('udf5_value', $metaInfo->getUdf5());
     }
 
     public function testPaymentFlowStructure(): void
@@ -196,9 +197,10 @@ class StandardCheckoutPayRequestBuilderTest extends BaseTestCase
             ->redirectUrl($testData['redirectUrl'])
             ->build();
 
-        // Meta info should be null or empty when no UDF fields are set
+        // MetaInfo is always created; with no UDF fields set all getters return null
         $metaInfo = $request->getMetaInfo();
-        $this->assertTrue(is_null($metaInfo) || (is_array($metaInfo) && empty($metaInfo)));
+        $this->assertInstanceOf(MetaInfo::class, $metaInfo);
+        $this->assertNull($metaInfo->getUdf1());
     }
 
     public function testSpecialCharactersInFields(): void
@@ -221,7 +223,7 @@ class StandardCheckoutPayRequestBuilderTest extends BaseTestCase
         $this->assertEquals($specialUrl, $paymentFlow['merchantUrls']['redirectUrl']);
         
         $metaInfo = $request->getMetaInfo();
-        $this->assertEquals('UDF with émojis: 🎉💳', $metaInfo['udf1']);
+        $this->assertEquals('UDF with émojis: 🎉💳', $metaInfo->getUdf1());
     }
 
     public function testLongFieldValues(): void
@@ -229,7 +231,7 @@ class StandardCheckoutPayRequestBuilderTest extends BaseTestCase
         $longOrderId = str_repeat('A', 100);
         $longMessage = str_repeat('This is a very long payment message. ', 10);
         $longUrl = 'https://example.com/very-long-callback-url-' . str_repeat('param', 20);
-        $longUdf = str_repeat('Long UDF value ', 20);
+        $longUdf = str_repeat('A', 256); // exactly at the 256-char limit for udf1-udf10
         
         $request = StandardCheckoutPayRequestBuilder::builder()
             ->merchantOrderId($longOrderId)
@@ -245,6 +247,6 @@ class StandardCheckoutPayRequestBuilderTest extends BaseTestCase
         $this->assertEquals($longUrl, $paymentFlow['merchantUrls']['redirectUrl']);
         
         $metaInfo = $request->getMetaInfo();
-        $this->assertEquals($longUdf, $metaInfo['udf1']);
+        $this->assertEquals($longUdf, $metaInfo->getUdf1());
     }
 }
