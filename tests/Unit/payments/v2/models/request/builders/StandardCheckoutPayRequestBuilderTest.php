@@ -20,6 +20,7 @@ namespace Tests\Unit\payments\v2\models\request\builders;
 
 use PhonePe\payments\v2\models\request\builders\StandardCheckoutPayRequestBuilder;
 use PhonePe\payments\v2\models\request\MetaInfo;
+use PhonePe\payments\v2\models\request\PrefillUserLoginDetails;
 use PhonePe\payments\v2\models\request\StandardCheckoutPayRequest;
 use PhonePe\payments\v2\standardCheckout\StandardCheckoutConstants;
 use Tests\Fixtures\TestDataProvider;
@@ -248,5 +249,82 @@ class StandardCheckoutPayRequestBuilderTest extends BaseTestCase
         
         $metaInfo = $request->getMetaInfo();
         $this->assertEquals($longUdf, $metaInfo->getUdf1());
+    }
+
+    public function testBuildPaymentRequestWithPrefillUserLoginDetails(): void
+    {
+        $testData = TestDataProvider::getPaymentRequestData();
+        $prefillDetails = new PrefillUserLoginDetails('9876543210');
+
+        $request = StandardCheckoutPayRequestBuilder::builder()
+            ->merchantOrderId($testData['merchantOrderId'])
+            ->amount($testData['amount'])
+            ->message($testData['message'])
+            ->redirectUrl($testData['redirectUrl'])
+            ->prefillUserLoginDetails($prefillDetails)
+            ->build();
+
+        $this->assertInstanceOf(StandardCheckoutPayRequest::class, $request);
+        $retrieved = $request->getPrefillUserLoginDetails();
+        $this->assertInstanceOf(PrefillUserLoginDetails::class, $retrieved);
+        $this->assertEquals('9876543210', $retrieved->getPhoneNumber());
+    }
+
+    public function testPrefillUserLoginDetailsAbsentByDefault(): void
+    {
+        $testData = TestDataProvider::getPaymentRequestData();
+
+        $request = StandardCheckoutPayRequestBuilder::builder()
+            ->merchantOrderId($testData['merchantOrderId'])
+            ->amount($testData['amount'])
+            ->message($testData['message'])
+            ->redirectUrl($testData['redirectUrl'])
+            ->build();
+
+        $this->assertNull($request->getPrefillUserLoginDetails());
+    }
+
+    public function testPrefillUserLoginDetailsOmittedFromJsonWhenNull(): void
+    {
+        $testData = TestDataProvider::getPaymentRequestData();
+
+        $request = StandardCheckoutPayRequestBuilder::builder()
+            ->merchantOrderId($testData['merchantOrderId'])
+            ->amount($testData['amount'])
+            ->message($testData['message'])
+            ->redirectUrl($testData['redirectUrl'])
+            ->build();
+
+        $json = json_encode($request);
+        $decoded = json_decode($json, true);
+        $this->assertArrayNotHasKey('prefillUserLoginDetails', $decoded);
+    }
+
+    public function testPrefillUserLoginDetailsPresentInJsonWhenSet(): void
+    {
+        $testData = TestDataProvider::getPaymentRequestData();
+        $prefillDetails = new PrefillUserLoginDetails('9876543210');
+
+        $request = StandardCheckoutPayRequestBuilder::builder()
+            ->merchantOrderId($testData['merchantOrderId'])
+            ->amount($testData['amount'])
+            ->message($testData['message'])
+            ->redirectUrl($testData['redirectUrl'])
+            ->prefillUserLoginDetails($prefillDetails)
+            ->build();
+
+        $json = json_encode($request);
+        $decoded = json_decode($json, true);
+        $this->assertArrayHasKey('prefillUserLoginDetails', $decoded);
+        $this->assertEquals('9876543210', $decoded['prefillUserLoginDetails']['phoneNumber']);
+    }
+
+    public function testPrefillUserLoginDetailsFluentInterface(): void
+    {
+        $builder = StandardCheckoutPayRequestBuilder::builder();
+        $prefillDetails = new PrefillUserLoginDetails('9876543210');
+
+        $result = $builder->prefillUserLoginDetails($prefillDetails);
+        $this->assertSame($builder, $result);
     }
 }
