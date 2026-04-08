@@ -54,7 +54,7 @@ class MetaInfo
 	 * @param string|null $udf14
 	 * @param string|null $udf15
 	 */
-	public function __construct(string $udf1 = null, string $udf2 = null, string $udf3 = null, string $udf4 = null, string $udf5 = null, string $udf6 = null, string $udf7 = null, string $udf8 = null, string $udf9 = null, string $udf10 = null, string $udf11 = null, string $udf12 = null, string $udf13 = null, string $udf14 = null, string $udf15 = null)
+	public function __construct(?string $udf1 = null, ?string $udf2 = null, ?string $udf3 = null, ?string $udf4 = null, ?string $udf5 = null, ?string $udf6 = null, ?string $udf7 = null, ?string $udf8 = null, ?string $udf9 = null, ?string $udf10 = null, ?string $udf11 = null, ?string $udf12 = null, ?string $udf13 = null, ?string $udf14 = null, ?string $udf15 = null)
 	{
 		$this->udf1 = $udf1;
 		$this->udf2 = $udf2;
