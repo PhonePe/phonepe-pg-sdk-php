@@ -112,7 +112,7 @@ class MetaInfo implements \JsonSerializable
 
 	private function validateUdf1To10(string $field, ?string $value): void
 	{
-		if ($value !== null && strlen($value) > self::UDF1_TO_10_MAX_LENGTH) {
+		if ($value !== null && mb_strlen($value, 'UTF-8') > self::UDF1_TO_10_MAX_LENGTH) {
 			throw new \InvalidArgumentException(
 				"{$field} must not exceed " . self::UDF1_TO_10_MAX_LENGTH . " characters"
 			);
@@ -125,7 +125,7 @@ class MetaInfo implements \JsonSerializable
 			return;
 		}
 
-		if (strlen($value) > self::UDF11_TO_15_MAX_LENGTH) {
+		if (mb_strlen($value, 'UTF-8') > self::UDF11_TO_15_MAX_LENGTH) {
 			throw new \InvalidArgumentException(
 				"{$field} must not exceed " . self::UDF11_TO_15_MAX_LENGTH . " characters"
 			);

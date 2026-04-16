@@ -290,6 +290,27 @@ class MetaInfoTest extends BaseTestCase
     }
 
     // -------------------------------------------------------------------------
+    // udf1–udf10: multibyte / UTF-8 character counting
+    // -------------------------------------------------------------------------
+
+    public function testUdf1AcceptsExactly256MultiBytechars(): void
+    {
+        // 256 emoji = 256 characters but 1024 bytes — must be accepted
+        $value = str_repeat('🎉', 256);
+        $metaInfo = new MetaInfo($value);
+        $this->assertEquals($value, $metaInfo->getUdf1());
+    }
+
+    public function testUdf1Rejects257MultiBytechars(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/udf1/');
+        $this->expectExceptionMessageMatches('/256/');
+
+        new MetaInfo(str_repeat('🎉', 257));
+    }
+
+    // -------------------------------------------------------------------------
     // udf1–udf10 allow special characters that udf11–udf15 would reject
     // -------------------------------------------------------------------------
 
