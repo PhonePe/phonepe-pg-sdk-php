@@ -234,7 +234,7 @@ class PaymentWorkflowIntegrationTest extends BaseTestCase
         }
     }
     
-    public function paymentAmountProvider(): array
+    public static function paymentAmountProvider(): array
     {
         return [
             [1, 'Minimum amount'],

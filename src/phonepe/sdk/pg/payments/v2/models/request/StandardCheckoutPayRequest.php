@@ -25,19 +25,22 @@ class StandardCheckoutPayRequest implements \JsonSerializable
 	private int $amount;
 	private $metaInfo;
 	private array $paymentFlow;
+	private ?PrefillUserLoginDetails $prefillUserLoginDetails;
 
 	/**
 	 * @param string $merchantOrderId
 	 * @param int $amount
 	 * @param $metaInfo
 	 * @param array $paymentFlow
+	 * @param PrefillUserLoginDetails|null $prefillUserLoginDetails
 	 */
-	public function __construct($merchantOrderId, $amount, $metaInfo, $paymentFlow)
+	public function __construct($merchantOrderId, $amount, $metaInfo, $paymentFlow, ?PrefillUserLoginDetails $prefillUserLoginDetails = null)
 	{
 		$this->merchantOrderId = $merchantOrderId;
 		$this->amount = $amount;
 		$this->metaInfo = $metaInfo;
 		$this->paymentFlow = $paymentFlow;
+		$this->prefillUserLoginDetails = $prefillUserLoginDetails;
 	}
 
 	/**
@@ -73,11 +76,28 @@ class StandardCheckoutPayRequest implements \JsonSerializable
 	}
 
 	/**
+	 * @return PrefillUserLoginDetails|null
+	 */
+	public function getPrefillUserLoginDetails(): ?PrefillUserLoginDetails
+	{
+		return $this->prefillUserLoginDetails;
+	}
+
+	/**
 	 * @return array
 	 */
 	public function jsonSerialize(): array
 	{
-		return get_object_vars($this);
+		$result = [
+			'merchantOrderId' => $this->merchantOrderId,
+			'amount' => $this->amount,
+			'metaInfo' => $this->metaInfo,
+			'paymentFlow' => $this->paymentFlow,
+		];
+		if ($this->prefillUserLoginDetails !== null) {
+			$result['prefillUserLoginDetails'] = $this->prefillUserLoginDetails;
+		}
+		return $result;
 	}
 
 
