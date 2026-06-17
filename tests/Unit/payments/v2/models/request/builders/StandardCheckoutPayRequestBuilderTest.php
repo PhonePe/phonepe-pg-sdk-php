@@ -19,12 +19,14 @@
 namespace Tests\Unit\payments\v2\models\request\builders;
 
 use PhonePe\payments\v2\models\request\builders\StandardCheckoutPayRequestBuilder;
+use PhonePe\payments\v2\models\request\CustomerDetails;
 use PhonePe\payments\v2\models\request\MetaInfo;
 use PhonePe\payments\v2\models\request\PrefillUserLoginDetails;
 use PhonePe\payments\v2\models\request\StandardCheckoutPayRequest;
 use PhonePe\payments\v2\standardCheckout\StandardCheckoutConstants;
 use Tests\Fixtures\TestDataProvider;
 use Tests\Unit\BaseTestCase;
+use InvalidArgumentException;
 
 class StandardCheckoutPayRequestBuilderTest extends BaseTestCase
 {
@@ -326,5 +328,233 @@ class StandardCheckoutPayRequestBuilderTest extends BaseTestCase
 
         $result = $builder->prefillUserLoginDetails($prefillDetails);
         $this->assertSame($builder, $result);
+    }
+
+    public function testBuildPaymentRequestWithCustomerDetails(): void
+    {
+        $builder = StandardCheckoutPayRequestBuilder::builder();
+        $result = $builder->customerDetails('John Doe', 'john.doe@example.com', '9876543210');
+        $this->assertSame($builder, $result);
+    }
+
+    public function testBuildPaymentRequestWithInvalidCustomerDetailsCustomerDetails(): void
+    {
+        $emailId = "";
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid email address: '. "'$emailId'.");
+        $builder = StandardCheckoutPayRequestBuilder::builder();
+        $result = $builder->customerDetails('John Doe', $emailId, '9876543210');
+    }
+
+    public function testBuildPaymentRequestWithValidCustomerDetails(): void
+    {
+        $testData = TestDataProvider::getPaymentRequestData();
+
+        $request = StandardCheckoutPayRequestBuilder::builder()
+            ->merchantOrderId($testData['merchantOrderId'])
+            ->amount($testData['amount'])
+            ->message($testData['message'])
+            ->redirectUrl($testData['redirectUrl'])
+            ->customerDetails('John Doe', 'john.doe@example.com', '9876543210')
+            ->build();
+
+        $this->assertInstanceOf(StandardCheckoutPayRequest::class, $request);
+        $customerDetails = $request->getCustomerDetails();
+        $this->assertInstanceOf(CustomerDetails::class, $customerDetails);
+        $this->assertEquals('John Doe', $customerDetails->getName());
+        $this->assertEquals('john.doe@example.com', $customerDetails->getEmail());
+        $this->assertEquals('9876543210', $customerDetails->getPhoneNumber());
+    }
+
+    public function testCustomerDetailsAbsentByDefault(): void
+    {
+        $testData = TestDataProvider::getPaymentRequestData();
+
+        $request = StandardCheckoutPayRequestBuilder::builder()
+            ->merchantOrderId($testData['merchantOrderId'])
+            ->amount($testData['amount'])
+            ->message($testData['message'])
+            ->redirectUrl($testData['redirectUrl'])
+            ->build();
+
+        $this->assertNull($request->getCustomerDetails());
+    }
+
+    public function testCustomerDetailsOmittedFromJsonWhenNull(): void
+    {
+        $testData = TestDataProvider::getPaymentRequestData();
+
+        $request = StandardCheckoutPayRequestBuilder::builder()
+            ->merchantOrderId($testData['merchantOrderId'])
+            ->amount($testData['amount'])
+            ->message($testData['message'])
+            ->redirectUrl($testData['redirectUrl'])
+            ->build();
+
+        $json = json_encode($request);
+        $decoded = json_decode($json, true);
+        $this->assertArrayNotHasKey('customerDetails', $decoded);
+    }
+
+    public function testCustomerDetailsPresentInJsonWhenSet(): void
+    {
+        $testData = TestDataProvider::getPaymentRequestData();
+
+        $request = StandardCheckoutPayRequestBuilder::builder()
+            ->merchantOrderId($testData['merchantOrderId'])
+            ->amount($testData['amount'])
+            ->message($testData['message'])
+            ->redirectUrl($testData['redirectUrl'])
+            ->customerDetails('John Doe', 'john.doe@example.com', '9876543210')
+            ->build();
+
+        $json = json_encode($request);
+        $decoded = json_decode($json, true);
+        $this->assertArrayHasKey('customerDetails', $decoded);
+        $this->assertEquals('John Doe', $decoded['customerDetails']['name']);
+        $this->assertEquals('john.doe@example.com', $decoded['customerDetails']['email']);
+        $this->assertEquals('9876543210', $decoded['customerDetails']['phoneNumber']);
+    }
+
+    public function testCustomerDetailsWithPartialData(): void
+    {
+        $testData = TestDataProvider::getPaymentRequestData();
+
+        $request = StandardCheckoutPayRequestBuilder::builder()
+            ->merchantOrderId($testData['merchantOrderId'])
+            ->amount($testData['amount'])
+            ->message($testData['message'])
+            ->redirectUrl($testData['redirectUrl'])
+            ->customerDetails('John Doe', null, '9876543210')
+            ->build();
+
+        $customerDetails = $request->getCustomerDetails();
+        $this->assertEquals('John Doe', $customerDetails->getName());
+        $this->assertNull($customerDetails->getEmail());
+        $this->assertEquals('9876543210', $customerDetails->getPhoneNumber());
+
+        $json = json_encode($request);
+        $decoded = json_decode($json, true);
+        $this->assertArrayHasKey('customerDetails', $decoded);
+        $this->assertArrayHasKey('name', $decoded['customerDetails']);
+        $this->assertArrayNotHasKey('email', $decoded['customerDetails']);
+        $this->assertArrayHasKey('phoneNumber', $decoded['customerDetails']);
+    }
+
+    public function testCustomerDetailsFluentInterface(): void
+    {
+        $builder = StandardCheckoutPayRequestBuilder::builder();
+
+        $result = $builder->customerDetails('John Doe', 'john@example.com', '9876543210');
+        $this->assertSame($builder, $result);
+    }
+
+    public function testCustomerDetailsWithInvalidEmail(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Invalid email address: 'invalid-email'.");
+
+        StandardCheckoutPayRequestBuilder::builder()
+            ->customerDetails('John Doe', 'invalid-email', '9876543210');
+    }
+
+    public function testCustomerDetailsWithInvalidPhoneNumber(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Invalid phoneNumber '12345': expected a 10-digit number or E.164 format");
+
+        StandardCheckoutPayRequestBuilder::builder()
+            ->customerDetails('John Doe', 'john@example.com', '12345');
+    }
+
+    public function testBuildPaymentRequestWithBothPrefillAndCustomerDetails(): void
+    {
+        $testData = TestDataProvider::getPaymentRequestData();
+        $prefillDetails = new PrefillUserLoginDetails('9876543210');
+
+        $request = StandardCheckoutPayRequestBuilder::builder()
+            ->merchantOrderId($testData['merchantOrderId'])
+            ->amount($testData['amount'])
+            ->message($testData['message'])
+            ->redirectUrl($testData['redirectUrl'])
+            ->prefillUserLoginDetails($prefillDetails)
+            ->customerDetails('John Doe', 'john.doe@example.com', '9876543210')
+            ->build();
+
+        $this->assertInstanceOf(StandardCheckoutPayRequest::class, $request);
+        
+        // Verify prefillUserLoginDetails
+        $retrievedPrefill = $request->getPrefillUserLoginDetails();
+        $this->assertInstanceOf(PrefillUserLoginDetails::class, $retrievedPrefill);
+        $this->assertEquals('9876543210', $retrievedPrefill->getPhoneNumber());
+
+        // Verify customerDetails
+        $customerDetails = $request->getCustomerDetails();
+        $this->assertInstanceOf(CustomerDetails::class, $customerDetails);
+        $this->assertEquals('John Doe', $customerDetails->getName());
+        $this->assertEquals('john.doe@example.com', $customerDetails->getEmail());
+        $this->assertEquals('9876543210', $customerDetails->getPhoneNumber());
+    }
+
+    public function testJsonSerializationWithBothPrefillAndCustomerDetails(): void
+    {
+        $testData = TestDataProvider::getPaymentRequestData();
+        $prefillDetails = new PrefillUserLoginDetails('9876543210');
+
+        $request = StandardCheckoutPayRequestBuilder::builder()
+            ->merchantOrderId($testData['merchantOrderId'])
+            ->amount($testData['amount'])
+            ->message($testData['message'])
+            ->redirectUrl($testData['redirectUrl'])
+            ->prefillUserLoginDetails($prefillDetails)
+            ->customerDetails('John Doe', 'john.doe@example.com', '9876543210')
+            ->build();
+
+        $json = json_encode($request);
+        $decoded = json_decode($json, true);
+
+        $this->assertArrayHasKey('prefillUserLoginDetails', $decoded);
+        $this->assertEquals('9876543210', $decoded['prefillUserLoginDetails']['phoneNumber']);
+
+        $this->assertArrayHasKey('customerDetails', $decoded);
+        $this->assertEquals('John Doe', $decoded['customerDetails']['name']);
+        $this->assertEquals('john.doe@example.com', $decoded['customerDetails']['email']);
+        $this->assertEquals('9876543210', $decoded['customerDetails']['phoneNumber']);
+    }
+
+    public function testCustomerDetailsWithE164PhoneNumber(): void
+    {
+        $testData = TestDataProvider::getPaymentRequestData();
+
+        $request = StandardCheckoutPayRequestBuilder::builder()
+            ->merchantOrderId($testData['merchantOrderId'])
+            ->amount($testData['amount'])
+            ->message($testData['message'])
+            ->redirectUrl($testData['redirectUrl'])
+            ->customerDetails('John Doe', 'john@example.com', '+919876543210')
+            ->build();
+
+        $customerDetails = $request->getCustomerDetails();
+        $this->assertEquals('+919876543210', $customerDetails->getPhoneNumber());
+    }
+
+    public function testBackwardCompatibilityPrefillUserLoginDetailsWithObject(): void
+    {
+        $testData = TestDataProvider::getPaymentRequestData();
+        $prefillDetails = new PrefillUserLoginDetails('9876543210');
+
+        // Test that the old API signature still works (backward compatibility)
+        $request = StandardCheckoutPayRequestBuilder::builder()
+            ->merchantOrderId($testData['merchantOrderId'])
+            ->amount($testData['amount'])
+            ->message($testData['message'])
+            ->redirectUrl($testData['redirectUrl'])
+            ->prefillUserLoginDetails($prefillDetails)
+            ->build();
+
+        $this->assertInstanceOf(StandardCheckoutPayRequest::class, $request);
+        $retrieved = $request->getPrefillUserLoginDetails();
+        $this->assertInstanceOf(PrefillUserLoginDetails::class, $retrieved);
+        $this->assertEquals('9876543210', $retrieved->getPhoneNumber());
     }
 }
