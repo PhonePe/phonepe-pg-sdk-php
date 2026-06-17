@@ -138,7 +138,7 @@ class MetaInfo implements \JsonSerializable
 		}
 	}
 
-	public function jsonSerialize(): array
+	public function jsonSerialize(): array|object
 	{
 		$result = [];
 
@@ -158,7 +158,8 @@ class MetaInfo implements \JsonSerializable
 		if ($this->udf14 !== null) $result['udf14'] = $this->udf14;
 		if ($this->udf15 !== null) $result['udf15'] = $this->udf15;
 
-		return $result;
+		// Force JSON object {} instead of array [] when empty
+		return empty($result) ? new \stdClass() : $result;
 	}
 
 	public function getUdf1(): ?string
