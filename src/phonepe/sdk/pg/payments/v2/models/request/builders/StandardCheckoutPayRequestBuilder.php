@@ -19,6 +19,7 @@
 
 namespace PhonePe\payments\v2\models\request\builders;
 
+use PhonePe\payments\v2\models\request\CustomerDetails;
 use PhonePe\payments\v2\models\request\MetaInfo;
 use PhonePe\payments\v2\models\request\PrefillUserLoginDetails;
 use PhonePe\payments\v2\models\request\StandardCheckoutPayRequest;
@@ -48,6 +49,7 @@ class StandardCheckoutPayRequestBuilder
 	private ?string $udf14 = null;
 	private ?string $udf15 = null;
 	private ?PrefillUserLoginDetails $prefillUserLoginDetails = null;
+	private ?CustomerDetails $customerDetails = null;
 
 	/**
 	 * @param string $merchantOrderId
@@ -175,6 +177,18 @@ class StandardCheckoutPayRequestBuilder
 	}
 
 	/**
+	 * @param string|null $name        The full name of the customer.
+	 * @param string|null $email       The email address of the customer.
+	 * @param string|null $phoneNumber The mobile number of the customer.
+	 * @return $this
+	 */
+	public function customerDetails(?string $name, ?string $email, ?string $phoneNumber): StandardCheckoutPayRequestBuilder
+	{
+		$this->customerDetails = new CustomerDetails($name, $email, $phoneNumber);
+		return $this;
+	}
+
+	/**
 	 * @return StandardCheckoutPayRequestBuilder
 	 */
 	public static function builder(): StandardCheckoutPayRequestBuilder
@@ -215,7 +229,8 @@ class StandardCheckoutPayRequestBuilder
 			$this->amount,
 			$metaInfo,
 			$paymentFlow,
-			$this->prefillUserLoginDetails
+			$this->prefillUserLoginDetails,
+			$this->customerDetails
 		);
 	}
 

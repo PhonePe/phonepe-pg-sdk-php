@@ -84,11 +84,17 @@ class MetaInfoTest extends BaseTestCase
         $this->assertArrayNotHasKey('udf6', $serialized);
     }
 
-    public function testJsonSerializeReturnsEmptyArrayWhenAllNull(): void
+    public function testJsonSerializeReturnsEmptyObjectWhenAllNull(): void
     {
         $metaInfo = new MetaInfo();
 
-        $this->assertSame([], $metaInfo->jsonSerialize());
+        // Should return stdClass (serializes to {}) not array (serializes to [])
+        $result = $metaInfo->jsonSerialize();
+        $this->assertInstanceOf(\stdClass::class, $result);
+        
+        // Verify it serializes to {} in JSON
+        $json = json_encode($result);
+        $this->assertSame('{}', $json);
     }
 
     public function testJsonSerializeIncludesOnlySetFields(): void
