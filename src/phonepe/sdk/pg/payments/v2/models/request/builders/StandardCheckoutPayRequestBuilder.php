@@ -167,24 +167,22 @@ class StandardCheckoutPayRequestBuilder
 	}
 
 	/**
-	 * @param string|null $name        The full name of the customer.
-	 * @param string|null $email       The email address of the customer.
-	 * @param string|null $phoneNumber The mobile number of the customer.
+	 * @param CustomerDetails $customerDetails
 	 * @return $this
 	 */
-	public function customerDetails(?string $name, ?string $email, ?string $phoneNumber): StandardCheckoutPayRequestBuilder
+	public function customerDetails(CustomerDetails $customerDetails): StandardCheckoutPayRequestBuilder
 	{
-		$this->customerDetails = new CustomerDetails($name, $email, $phoneNumber);
+		$this->customerDetails = $customerDetails;
 		return $this;
 	}
 
 	/**
-	 * @param string|null $phoneNumber The mobile number to pre-fill on the PhonePe payment page.
+	 * @param PrefillUserLoginDetails $prefillUserLoginDetails
 	 * @return $this
 	 */
-	public function prefillUserLoginDetails(?string $phoneNumber): StandardCheckoutPayRequestBuilder
+	public function prefillUserLoginDetails(PrefillUserLoginDetails $prefillUserLoginDetails): StandardCheckoutPayRequestBuilder
 	{
-		$this->prefillUserLoginDetails = new PrefillUserLoginDetails($phoneNumber);
+		$this->prefillUserLoginDetails = $prefillUserLoginDetails;
 		return $this;
 	}
 
