@@ -26,6 +26,7 @@ class StandardCheckoutPayRequest implements \JsonSerializable
 	private $metaInfo;
 	private array $paymentFlow;
 	private ?PrefillUserLoginDetails $prefillUserLoginDetails;
+	private ?CustomerDetails $customerDetails;
 
 	/**
 	 * @param string $merchantOrderId
@@ -34,13 +35,14 @@ class StandardCheckoutPayRequest implements \JsonSerializable
 	 * @param array $paymentFlow
 	 * @param PrefillUserLoginDetails|null $prefillUserLoginDetails
 	 */
-	public function __construct($merchantOrderId, $amount, $metaInfo, $paymentFlow, ?PrefillUserLoginDetails $prefillUserLoginDetails = null)
+	public function __construct($merchantOrderId, $amount, $metaInfo, $paymentFlow, ?PrefillUserLoginDetails $prefillUserLoginDetails = null, ?CustomerDetails $customerDetails = null)
 	{
 		$this->merchantOrderId = $merchantOrderId;
 		$this->amount = $amount;
 		$this->metaInfo = $metaInfo;
 		$this->paymentFlow = $paymentFlow;
 		$this->prefillUserLoginDetails = $prefillUserLoginDetails;
+		$this->customerDetails = $customerDetails;
 	}
 
 	/**
@@ -83,6 +85,14 @@ class StandardCheckoutPayRequest implements \JsonSerializable
 		return $this->prefillUserLoginDetails;
 	}
 
+    /**
+     * @return CustomerDetails|null
+     */
+    public function getCustomerDetails(): ?CustomerDetails
+    {
+       return $this->customerDetails;
+    }
+
 	/**
 	 * @return array
 	 */
@@ -97,6 +107,9 @@ class StandardCheckoutPayRequest implements \JsonSerializable
 		if ($this->prefillUserLoginDetails !== null) {
 			$result['prefillUserLoginDetails'] = $this->prefillUserLoginDetails;
 		}
+        if ($this->customerDetails !== null) {
+            $result['customerDetails'] = $this->customerDetails;
+        }
 		return $result;
 	}
 
