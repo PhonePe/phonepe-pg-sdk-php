@@ -27,4 +27,5 @@ class Instruments
 	const ACCOUNT = "ACCOUNT";
 	const WALLET = "WALLET";
 	const EGV = "EGV";
+	const CREDIT_LINE = "CREDIT_LINE";
 }

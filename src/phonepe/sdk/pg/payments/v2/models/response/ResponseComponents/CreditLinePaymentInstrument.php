@@ -19,29 +19,56 @@
 
 namespace PhonePe\payments\v2\models\response\ResponseComponents;
 
+use PhonePe\common\configs\Instruments;
+
 class CreditLinePaymentInstrument extends Instrument
 {
-	public string	$ifsc;
-	public string $accountHolderName;
+	public ?string	$ifsc;
+	public ?string $accountHolderName;
+	public ?string $providerAccountType;
+	public ?string $bankId;
+	public ?string $maskedAccountNumber;
 
 	/**
-	 * @param string $ifsc
-	 * @param string $accountHolderName
+	 * @param string|null $ifsc
+	 * @param string|null $accountHolderName
+	 * @param string|null $providerAccountType
+	 * @param string|null $bankId
+	 * @param string|null $maskedAccountNumber
 	 */
-	public function __construct(string $ifsc, string $accountHolderName)
+	public function __construct(?string $ifsc = null, ?string $accountHolderName = null, ?string $providerAccountType = null, ?string $bankId = null, ?string $maskedAccountNumber = null)
 	{
+		$this->type = Instruments::CREDIT_LINE;
 		$this->ifsc = $ifsc;
 		$this->accountHolderName = $accountHolderName;
+		$this->providerAccountType = $providerAccountType;
+		$this->bankId = $bankId;
+		$this->maskedAccountNumber = $maskedAccountNumber;
 	}
 
-	public function getIfsc(): string
+	public function getIfsc(): ?string
 	{
 		return $this->ifsc;
 	}
 
-	public function getAccountHolderName(): string
+	public function getAccountHolderName(): ?string
 	{
 		return $this->accountHolderName;
+	}
+
+	public function getBankId(): ?string
+	{
+		return $this->bankId;
+	}
+
+	public function getMaskedAccountNumber(): ?string
+	{
+		return $this->maskedAccountNumber;
+	}
+
+	public function getProviderAccountType(): ?string
+	{
+		return $this->providerAccountType;
 	}
 
 }
